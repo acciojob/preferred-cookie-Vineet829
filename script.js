@@ -1,32 +1,50 @@
-const fontsize = document.getElementById('fontsize');
-const fontcolor = document.getElementById('fontcolor');
-const submit = document.getElementById('submit');
 
-submit.addEventListener('click', (e) => {
-    e.preventDefault();
-    const size = fontsize.value;
-    const color = fontcolor.value;
+function setCookie(name, value, days) {
+  const expires = new Date(Date.now() + days * 24 * 60 * 60 * 1000).toUTCString();
+  document.cookie = `${name}=${encodeURIComponent(value)}; expires=${expires}; path=/`;
+}
 
-    let date = new Date();
-    date.setTime(date.getTime() + (1 * 24 * 60 * 60 * 1000));  
-    let expires = "expires=" + date.toUTCString();
-    
-  
-    document.cookie = `fontsize=${size}, fontcolor=${color}, ${expires}; path=/`;
-    seeCookie();
+
+function getCookie(name) {
+  const cookies = document.cookie.split(';');
+  for (const cookie of cookies) {
+    const [cookieName, cookieValue] = cookie.trim().split('=');
+    if (cookieName === name) {
+      return decodeURIComponent(cookieValue);
+    }
+  }
+  return null;
+}
+
+
+function applyPreferences() {
+  const fontSize = getCookie('fontsize');
+  const fontColor = getCookie('fontcolor');
+
+  if (fontSize) {
+    document.documentElement.style.setProperty('--fontsize', fontSize + 'px');
+    document.getElementById('fontsize').value = fontSize;
+  }
+
+  if (fontColor) {
+    document.documentElement.style.setProperty('--fontcolor', fontColor);
+    document.getElementById('fontcolor').value = fontColor;
+  }
+}
+
+
+document.querySelector('form').addEventListener('submit', function (e) {
+  e.preventDefault();
+
+  const fontSize = document.getElementById('fontsize').value;
+  const fontColor = document.getElementById('fontcolor').value;
+
+  // Set CSS variables and save preferences in cookies
+  document.documentElement.style.setProperty('--fontsize', fontSize + 'px');
+  document.documentElement.style.setProperty('--fontcolor', fontColor);
+  setCookie('fontsize', fontSize, 30);
+  setCookie('fontcolor', fontColor, 30);
 });
 
-function seeCookie(){
-    if (document.cookie) {
-       
-        const data = document.cookie.split(", ");
-        const size = Number(data[0].split("=")[1]);
-        const color = data[1].split("=")[1];
-        
-        console.log(size, color);
-        document.body.style.fontSize = size;
-        document.body.style.color = color;
 
-    }
-}
-seeCookie();
+applyPreferences();
